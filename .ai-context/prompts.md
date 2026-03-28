@@ -105,6 +105,36 @@ CONSTRAINTS:
 
 ---
 
+## Prompt 3.1: OTP Module (Nodemailer)
+
+```
+CONTEXT: Read all .ai-context files. Auth module is already implemented.
+
+TASK:
+Implement OTP (One-Time Password) module for email verification and password reset:
+
+1. `src/types/otp.types.ts` — OtpRequest, OtpVerifyInput, OtpGenerateOutput, OtpVerifyOutput interfaces
+2. `src/validators/otp/index.ts` — otpRequestValidator, otpVerifyValidator
+3. `src/repositories/otp/index.ts` — OtpRepository class with: create, findByCode, findByEmail, findByPhone, update, delete, findValidByCode
+4. `src/services/otp/helper.ts` — generateOtpCode (6-digit), sendOtpEmail, sendOtpSms (mocked), verifyOtpCode
+5. `src/services/otp/index.ts` — OtpService class with: requestOtp (email/phone), verifyOtp (email/phone + code), generateOtpCode, sendOtpEmail, sendOtpSms
+6. `src/controllers/otp/index.ts` — requestOtpController, verifyOtpController
+7. `src/routes/otp/index.ts` — otpRouter with endpoints: POST /request, POST /verify
+
+Mount otpRouter into `src/routes/index.ts`.
+
+CONSTRAINTS:
+- OTP code must be 6 digits
+- OTP expires after 10 minutes
+- Max 3 attempts per OTP
+- After successful verification, OTP must be invalidated
+- Use email or phone as identifier
+- Email verification for registration, password reset
+- Phone verification for future SMS features (mock for now)
+```
+
+---
+
 ## Prompt 4: User Profile Module
 
 ```

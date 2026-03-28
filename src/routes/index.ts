@@ -4,6 +4,7 @@ import { userRouter } from './user';
 import { musicRouter } from './music';
 import { roomRouter } from './room';
 import { playlistRouter } from './playlist';
+import { otpRouter } from './otp';
 import { authMiddleware } from '../middlewares/auth';
 
 const rootRouter: Router = Router();
@@ -13,5 +14,6 @@ rootRouter.use('/users', authMiddleware, userRouter);
 rootRouter.use('/music', authMiddleware, musicRouter);
 rootRouter.use('/rooms', authMiddleware, roomRouter);
 rootRouter.use('/playlists', authMiddleware, playlistRouter);
+rootRouter.use('/otp', otpRouter);
 
 export { rootRouter };

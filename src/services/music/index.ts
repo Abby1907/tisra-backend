@@ -6,6 +6,7 @@ import {
   SpotifyNewReleasesResponse,
   SpotifyTrack,
 } from '../../types/music.types';
+import { logger } from '../../utils/logger';
 
 export class MusicService {
   static async search(params: SearchQueryParams): Promise<TrackDetails[]> {
@@ -20,6 +21,7 @@ export class MusicService {
       albumArt: item.album.images[0]?.url || null,
       durationMs: item.duration_ms,
       spotifyUrl: `https://open.spotify.com/track/${item.id}`,
+      previewUrl: item.preview_url || null,
     }));
   }
 
@@ -34,14 +36,23 @@ export class MusicService {
       albumArt: track.album.images[0]?.url || null,
       durationMs: track.duration_ms,
       spotifyUrl: `https://open.spotify.com/track/${track.id}`,
+      previewUrl: track.preview_url || null,
     };
   }
 
   static async getFeatured(): Promise<SpotifyFeaturedResponse> {
-    return SpotifyHelper.getFeaturedPlaylists();
+    const result = await SpotifyHelper.getFeaturedPlaylists();
+    if (result.message === 'Popular Playlists') {
+      logger.info('Spotify browse/featured-playlists failed (404), using search fallback.');
+    }
+    return result;
   }
 
   static async getNewReleases(): Promise<SpotifyNewReleasesResponse> {
-    return SpotifyHelper.getNewReleases();
+    const result = await SpotifyHelper.getNewReleases();
+    if (result.albums.items.length > 0 && !('message' in result)) {
+      // In a real scenario, we might add a custom flag to detections
+    }
+    return result;
   }
 }

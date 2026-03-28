@@ -1,7 +1,14 @@
 import { prisma } from '../src/config/database';
 
 export const clearDatabase = async (): Promise<void> => {
-  const tables = ['room_participants', 'playlist_tracks', 'playlists', 'chat_messages', 'rooms', 'users'];
+  const tables = [
+    'room_participants',
+    'playlist_tracks',
+    'playlists',
+    'chat_messages',
+    'rooms',
+    'users',
+  ];
   try {
     for (const table of tables) {
       await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);

@@ -12,7 +12,7 @@ const app: Application = express();
 
 // Global Middlewares
 app.use(helmet());
-app.use(cors({ origin: env.corsOrigin }));
+app.use(cors({ origin: env.corsOrigin, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

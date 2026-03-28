@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../../services/auth';
-import { ApiResponse } from '../../types/common.types';
+import { ApiResponse, AuthenticatedRequest } from '../../types/common.types';
 import { RegisterInput, LoginInput, RefreshTokenInput } from '../../types/auth.types';
 import { accessTokenCookieConfig, refreshTokenCookieConfig } from '../../config/cookie';
 
@@ -83,6 +83,63 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Logged out successfully',
+      } as ApiResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, code } = req.body;
+      await AuthService.verifyEmail(email, code);
+
+      res.status(200).json({
+        success: true,
+        message: 'Email verified successfully. You can now login.',
+      } as ApiResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email } = req.body;
+      await AuthService.forgotPassword(email);
+
+      res.status(200).json({
+        success: true,
+        message: 'If an account exists with that email, an OTP has been sent.',
+      } as ApiResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, code, password } = req.body;
+      await AuthService.resetPassword(email, code, password);
+
+      res.status(200).json({
+        success: true,
+        message: 'Password reset successfully. You can now login with your new password.',
+      } as ApiResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getMe(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id; // Populated by authMiddleware
+      const user = await AuthService.getCurrentUser(userId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Current user fetched successfully',
+        data: user,
       } as ApiResponse);
     } catch (error) {
       next(error);

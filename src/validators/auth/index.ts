@@ -19,6 +19,21 @@ const refreshTokenSchema: Joi.ObjectSchema = Joi.object({
   refreshToken: Joi.string().required(),
 });
 
+const verifyEmailSchema: Joi.ObjectSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().length(6).required(),
+});
+
+const forgotPasswordSchema: Joi.ObjectSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const resetPasswordSchema: Joi.ObjectSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().length(6).required(),
+  password: Joi.string().min(8).max(128).required(),
+});
+
 const validate = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const data = { ...req.body, ...req.cookies };
@@ -38,3 +53,6 @@ const validate = (schema: Joi.ObjectSchema) => {
 export const registerValidator = validate(registerSchema);
 export const loginValidator = validate(loginSchema);
 export const refreshTokenValidator = validate(refreshTokenSchema);
+export const verifyEmailValidator = validate(verifyEmailSchema);
+export const forgotPasswordValidator = validate(forgotPasswordSchema);
+export const resetPasswordValidator = validate(resetPasswordSchema);

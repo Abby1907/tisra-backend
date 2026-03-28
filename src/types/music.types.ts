@@ -7,6 +7,7 @@ export interface SpotifyTrack {
     images: { url: string }[];
   };
   duration_ms: number;
+  preview_url: string | null;
 }
 
 export interface TrackDetails {
@@ -17,6 +18,7 @@ export interface TrackDetails {
   albumArt: string | null;
   durationMs: number;
   spotifyUrl: string;
+  previewUrl: string | null;
 }
 
 export interface SpotifySearchResult {

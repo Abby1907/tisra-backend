@@ -40,20 +40,79 @@ export class SpotifyHelper {
   }
 
   static async getFeaturedPlaylists(limit: number = 20): Promise<SpotifyFeaturedResponse> {
-    const headers = await this.getHeaders();
-    const response = await axios.get(`${this.BASE_URL}/browse/featured-playlists`, {
-      headers,
-      params: { limit },
-    });
-    return response.data as SpotifyFeaturedResponse;
+    try {
+      const headers = await this.getHeaders();
+      const response = await axios.get(`${this.BASE_URL}/browse/featured-playlists`, {
+        headers,
+        params: { limit },
+      });
+      return response.data as SpotifyFeaturedResponse;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        // Fallback: Search for popular playlists
+        const headers = await this.getHeaders();
+        const searchRes = await axios.get(`${this.BASE_URL}/search`, {
+          headers,
+          params: {
+            q: 'Top Global Hits',
+            type: 'playlist',
+            limit,
+          },
+        });
+
+        return {
+          message: 'Popular Playlists',
+          playlists: {
+            items: searchRes.data.playlists.items
+              .filter((p: any) => p !== null)
+              .map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                images: p.images,
+                description: p.description,
+              })),
+          },
+        };
+      }
+      throw error;
+    }
   }
 
   static async getNewReleases(limit: number = 20): Promise<SpotifyNewReleasesResponse> {
-    const headers = await this.getHeaders();
-    const response = await axios.get(`${this.BASE_URL}/browse/new-releases`, {
-      headers,
-      params: { limit },
-    });
-    return response.data as SpotifyNewReleasesResponse;
+    try {
+      const headers = await this.getHeaders();
+      const response = await axios.get(`${this.BASE_URL}/browse/new-releases`, {
+        headers,
+        params: { limit },
+      });
+      return response.data as SpotifyNewReleasesResponse;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        // Fallback: Search for new albums
+        const headers = await this.getHeaders();
+        const searchRes = await axios.get(`${this.BASE_URL}/search`, {
+          headers,
+          params: {
+            q: 'tag:new',
+            type: 'album',
+            limit,
+          },
+        });
+
+        return {
+          albums: {
+            items: searchRes.data.albums.items
+              .filter((a: any) => a !== null)
+              .map((a: any) => ({
+                id: a.id,
+                name: a.name,
+                images: a.images,
+                artists: a.artists,
+              })),
+          },
+        };
+      }
+      throw error;
+    }
   }
 }

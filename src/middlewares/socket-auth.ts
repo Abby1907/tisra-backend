@@ -6,7 +6,7 @@ import cookie from 'cookie';
 import { SocketData } from '../types/socket.types';
 
 export const socketAuthMiddleware = (
-  socket: Socket<any, any, any, SocketData>,
+  socket: Socket<Record<string, never>, Record<string, never>, Record<string, never>, SocketData>,
   next: (err?: ExtendedError) => void
 ): void => {
   try {

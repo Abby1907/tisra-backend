@@ -11,7 +11,7 @@ const httpServer = createServer(app);
 // Initialize Socket.IO
 initializeSocketIO(httpServer);
 
-const start = async () => {
+const start = async (): Promise<void> => {
   try {
     // Test database connection
     await prisma.$connect();

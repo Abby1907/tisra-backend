@@ -70,7 +70,7 @@ export class RoomService {
     userId: string,
     roomCode: string,
     data: { isPlaying: boolean; currentTrackId?: string | null; positionMs?: number }
-  ) {
+  ): Promise<unknown> {
     const room = await RoomRepository.findByCode(roomCode);
     if (!room) throw new NotFoundError('Room');
     if (room.hostId !== userId) throw new ForbiddenError('Only the host can control playback');

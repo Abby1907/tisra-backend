@@ -7,7 +7,8 @@ import {
   LoginOutput,
   AuthTokens,
 } from '../../types/auth.types';
-import { ConflictError, UnauthorizedError } from '../../errors';
+import { ConflictError, UnauthorizedError, ValidationError } from '../../errors';
+import { OtpService } from '../otp';
 
 export class AuthService {
   static async register(data: RegisterInput): Promise<RegisterOutput> {
@@ -38,6 +39,9 @@ export class AuthService {
       username: user.username,
     });
 
+    // Request OTP for email verification
+    await OtpService.requestOtp({ identifier: email, type: 'email' });
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash: _, ...userWithoutPassword } = user;
 
@@ -57,6 +61,13 @@ export class AuthService {
     // Compare password
     const isPasswordMatch = await AuthHelper.comparePassword(password, user.passwordHash);
     if (!isPasswordMatch) throw new UnauthorizedError('Invalid credentials');
+
+    // Check if verified
+    if (!user.isVerified) {
+      // Re-send OTP if not verified
+      await OtpService.requestOtp({ identifier: user.email, type: 'email' });
+      throw new UnauthorizedError('Please verify your email to login. A new OTP has been sent.');
+    }
 
     // Generate tokens
     const tokens = AuthHelper.generateTokens({
@@ -91,8 +102,41 @@ export class AuthService {
   }
 
   static async logout(_token?: string): Promise<void> {
-    // For simple JWT setup, logout is handled by client (deleting local token).
-    // If using a blacklist or session in DB, implement logic here.
     return Promise.resolve();
+  }
+
+  static async verifyEmail(email: string, code: string): Promise<void> {
+    await OtpService.validateOtpBeforeAction(email, code);
+
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new ValidationError('User not found');
+
+    await UserRepository.update(user.id, { isVerified: true });
+  }
+
+  static async forgotPassword(identifier: string): Promise<void> {
+    const user = await UserRepository.findByEmail(identifier);
+    if (!user) return;
+
+    await OtpService.requestOtp({ identifier: user.email, type: 'email' });
+  }
+
+  static async resetPassword(identifier: string, code: string, password: string): Promise<void> {
+    await OtpService.validateOtpBeforeAction(identifier, code);
+
+    const user = await UserRepository.findByEmail(identifier);
+    if (!user) throw new ValidationError('User not found');
+
+    const passwordHash = await AuthHelper.hashPassword(password);
+    await UserRepository.update(user.id, { passwordHash });
+  }
+
+  static async getCurrentUser(userId: string): Promise<any> {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new UnauthorizedError('User not found');
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
