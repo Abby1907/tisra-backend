@@ -21,7 +21,8 @@ const refreshTokenSchema: Joi.ObjectSchema = Joi.object({
 
 const validate = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const { error } = schema.validate(req.body, { abortEarly: false });
+    const data = { ...req.body, ...req.cookies };
+    const { error } = schema.validate(data, { abortEarly: false });
     if (error) {
       res.status(422).json({
         success: false,
