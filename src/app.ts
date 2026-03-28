@@ -1,8 +1,10 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import { env } from './config/env';
+import { rootRouter } from './routes';
 import { errorHandler } from './middlewares/error-handler';
 import { ApiResponse } from './types/common.types';
 
@@ -11,8 +13,12 @@ const app: Application = express();
 // Global Middlewares
 app.use(helmet());
 app.use(cors({ origin: env.corsOrigin }));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api/v1', rootRouter);
 
 // Rate Limiting
 const limiter = rateLimit({

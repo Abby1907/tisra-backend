@@ -1,0 +1,98 @@
+import { UserRepository } from '../../repositories/user';
+import { AuthHelper } from './helper';
+import {
+  RegisterInput,
+  RegisterOutput,
+  LoginInput,
+  LoginOutput,
+  AuthTokens,
+} from '../../types/auth.types';
+import { ConflictError, UnauthorizedError } from '../../errors';
+
+export class AuthService {
+  static async register(data: RegisterInput): Promise<RegisterOutput> {
+    const { email, username, password, displayName } = data;
+
+    // Check if user exists
+    const existingEmail = await UserRepository.findByEmail(email);
+    if (existingEmail) throw new ConflictError('Email already registered');
+
+    const existingUsername = await UserRepository.findByUsername(username);
+    if (existingUsername) throw new ConflictError('Username already taken');
+
+    // Hash password
+    const passwordHash = await AuthHelper.hashPassword(password);
+
+    // Create user
+    const user = await UserRepository.create({
+      email,
+      username,
+      passwordHash,
+      displayName,
+    });
+
+    // Generate tokens
+    const tokens = AuthHelper.generateTokens({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, tokens };
+  }
+
+  static async login(data: LoginInput): Promise<LoginOutput> {
+    const { email, username, password } = data;
+
+    // Find user
+    const user = email
+      ? await UserRepository.findByEmail(email)
+      : await UserRepository.findByUsername(username!);
+
+    if (!user) throw new UnauthorizedError('Invalid credentials');
+
+    // Compare password
+    const isPasswordMatch = await AuthHelper.comparePassword(password, user.passwordHash);
+    if (!isPasswordMatch) throw new UnauthorizedError('Invalid credentials');
+
+    // Generate tokens
+    const tokens = AuthHelper.generateTokens({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, tokens };
+  }
+
+  static async refreshToken(token: string): Promise<AuthTokens> {
+    try {
+      const payload = AuthHelper.verifyRefreshToken(token);
+
+      // Verify user still exists
+      const user = await UserRepository.findById(payload.id);
+      if (!user) throw new UnauthorizedError('User no longer exists');
+
+      // Generate new tokens
+      return AuthHelper.generateTokens({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      });
+    } catch (error) {
+      throw new UnauthorizedError('Invalid refresh token');
+    }
+  }
+
+  static async logout(_token?: string): Promise<void> {
+    // For simple JWT setup, logout is handled by client (deleting local token).
+    // If using a blacklist or session in DB, implement logic here.
+    return Promise.resolve();
+  }
+}
