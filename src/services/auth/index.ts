@@ -1,4 +1,5 @@
 import { UserRepository } from '../../repositories/user';
+import { User } from '@prisma/client';
 import { AuthHelper } from './helper';
 import {
   RegisterInput,
@@ -131,7 +132,7 @@ export class AuthService {
     await UserRepository.update(user.id, { passwordHash });
   }
 
-  static async getCurrentUser(userId: string): Promise<any> {
+  static async getCurrentUser(userId: string): Promise<Partial<User>> {
     const user = await UserRepository.findById(userId);
     if (!user) throw new UnauthorizedError('User not found');
 

@@ -47,8 +47,8 @@ export class SpotifyHelper {
         params: { limit },
       });
       return response.data as SpotifyFeaturedResponse;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         // Fallback: Search for popular playlists
         const headers = await this.getHeaders();
         const searchRes = await axios.get(`${this.BASE_URL}/search`, {
@@ -64,12 +64,12 @@ export class SpotifyHelper {
           message: 'Popular Playlists',
           playlists: {
             items: searchRes.data.playlists.items
-              .filter((p: any) => p !== null)
-              .map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                images: p.images,
-                description: p.description,
+              .filter((p: unknown) => p !== null)
+              .map((p: unknown) => ({
+                id: (p as { id: string }).id,
+                name: (p as { name: string }).name,
+                images: (p as { images: { url: string }[] }).images,
+                description: (p as { description: string }).description,
               })),
           },
         };
@@ -86,8 +86,8 @@ export class SpotifyHelper {
         params: { limit },
       });
       return response.data as SpotifyNewReleasesResponse;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         // Fallback: Search for new albums
         const headers = await this.getHeaders();
         const searchRes = await axios.get(`${this.BASE_URL}/search`, {
@@ -102,12 +102,12 @@ export class SpotifyHelper {
         return {
           albums: {
             items: searchRes.data.albums.items
-              .filter((a: any) => a !== null)
-              .map((a: any) => ({
-                id: a.id,
-                name: a.name,
-                images: a.images,
-                artists: a.artists,
+              .filter((a: unknown) => a !== null)
+              .map((a: unknown) => ({
+                id: (a as { id: string }).id,
+                name: (a as { name: string }).name,
+                images: (a as { images: { url: string }[] }).images,
+                artists: (a as { artists: { name: string }[] }).artists,
               })),
           },
         };

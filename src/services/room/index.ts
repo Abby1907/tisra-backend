@@ -3,7 +3,7 @@ import { RoomParticipantRepository } from '../../repositories/room-participant';
 import { CreateRoomInput, RoomDetails, RoomParticipantDetails } from '../../types/room.types';
 import { generateRoomCode } from './helper';
 import { NotFoundError, ForbiddenError, ConflictError } from '../../errors';
-import { PlaybackState } from '@prisma/client';
+import { PlaybackState, Room } from '@prisma/client';
 
 export class RoomService {
   static async createRoom(userId: string, data: CreateRoomInput): Promise<RoomDetails> {
@@ -70,7 +70,7 @@ export class RoomService {
     userId: string,
     roomCode: string,
     data: { isPlaying: boolean; currentTrackId?: string | null; positionMs?: number }
-  ): Promise<unknown> {
+  ): Promise<Room> {
     const room = await RoomRepository.findByCode(roomCode);
     if (!room) throw new NotFoundError('Room');
     if (room.hostId !== userId) throw new ForbiddenError('Only the host can control playback');

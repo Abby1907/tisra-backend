@@ -37,7 +37,7 @@ const resetPasswordSchema: Joi.ObjectSchema = Joi.object({
 const validate = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const data = { ...req.body, ...req.cookies };
-    const { error } = schema.validate(data, { abortEarly: false });
+    const { error } = schema.validate(data, { abortEarly: false, allowUnknown: true });
     if (error) {
       res.status(422).json({
         success: false,

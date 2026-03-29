@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../../controllers/auth';
+import { SpotifyController } from '../../controllers/spotify';
 import {
   registerValidator,
   loginValidator,
@@ -20,5 +21,9 @@ authRouter.post('/verify-email', verifyEmailValidator, AuthController.verifyEmai
 authRouter.post('/forgot-password', forgotPasswordValidator, AuthController.forgotPassword);
 authRouter.post('/reset-password', resetPasswordValidator, AuthController.resetPassword);
 authRouter.get('/me', authMiddleware, AuthController.getMe);
+
+// Spotify OAuth
+authRouter.get('/spotify/login', authMiddleware, SpotifyController.login);
+authRouter.get('/spotify/callback', SpotifyController.callback);
 
 export { authRouter };

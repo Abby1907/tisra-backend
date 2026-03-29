@@ -13,6 +13,7 @@ const envSchema: Joi.ObjectSchema = Joi.object({
   JWT_REFRESH_EXPIRY: Joi.string().default('7d'),
   SPOTIFY_CLIENT_ID: Joi.string().required(),
   SPOTIFY_CLIENT_SECRET: Joi.string().required(),
+  SPOTIFY_CALLBACK_URL: Joi.string().required(),
   SMTP_HOST: Joi.string().required(),
   SMTP_PORT: Joi.number().required(),
   SMTP_USER: Joi.string().required(),
@@ -40,6 +41,7 @@ export const env = {
   spotify: {
     clientId: envVars.SPOTIFY_CLIENT_ID as string,
     clientSecret: envVars.SPOTIFY_CLIENT_SECRET as string,
+    callbackUrl: envVars.SPOTIFY_CALLBACK_URL as string,
   },
   smtp: {
     host: envVars.SMTP_HOST as string,

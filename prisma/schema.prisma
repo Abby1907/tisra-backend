@@ -22,10 +22,14 @@ model User {
   username     String   @unique
   passwordHash String
   displayName  String
-  avatarUrl    String?
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  avatarUrl            String?
+  isVerified           Boolean   @default(false)
+  spotifyId            String?   @unique
+  spotifyAccessToken   String?
+  spotifyRefreshToken  String?
+  spotifyTokenExpiresAt DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   // Relations
   hostedRooms      Room[]            @relation("RoomHost")

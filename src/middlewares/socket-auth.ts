@@ -6,7 +6,8 @@ import cookie from 'cookie';
 import { SocketData } from '../types/socket.types';
 
 export const socketAuthMiddleware = (
-  socket: Socket<Record<string, never>, Record<string, never>, Record<string, never>, SocketData>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  socket: Socket<any, any, any, SocketData>,
   next: (err?: ExtendedError) => void
 ): void => {
   try {
